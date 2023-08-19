@@ -3,6 +3,14 @@
 # dependencies
 node_modules/
 
+# Ignore package.json and package-lock.json
+package.json
+package-lock.json
+
+# Ignore config.js
+app.config.js
+babel.config.js
+
 # Expo
 .expo/
 dist/
