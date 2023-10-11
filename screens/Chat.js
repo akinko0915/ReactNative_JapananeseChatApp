@@ -8,7 +8,6 @@ import { EmailAuthCredential, signOut } from 'firebase/auth';
 import { auth, database } from '../config/firebase';
 import { useNavigation } from "@react-navigation/native";
 import { openai } from "../config/openai";
-import axios from 'axios';
 
 
 
@@ -70,7 +69,7 @@ export default function Chat(){
                 const data = doc.data();
                 chats.push({
                     _id: data._id,
-                    createdAt: data.createdAt.toDate(), // Convert firestore timestamp to JS Date object
+                    createdAt: data.createdAt.toDate(), 
                     text: data.text,
                     user: data.user,
                 })
@@ -104,32 +103,29 @@ export default function Chat(){
 
     const convertText = async (text) => {
         try {
-            const response = await axios.post('https://api.openai.com/v1/chat/completions',
-            {
-                model: "gpt-3.5-turbo-0613",
-                max_tokens: 150,
-                prompt: `Translate the following Japanese text into a simplified version with fewer Kanji in formal style to tell a foreigner who is a beginner in Japanese: ${text}`,
-            }, {
-                headers: {
-                    'Authorization' : `Bearer ${openai}`,
-                    'Content-Type' : 'application/json',
-                },
-                method: 'POST',
-            })
-           
+            const response = await openai.completions.create({
+               model: "gpt-3.5-turbo",
+               prompt:  `Translate the following Japanese text into a simplified version with fewer Kanji in formal style to tell a foreigner who is a beginner in Japanese: ${text}`,
+               max_tokens: 150,
+            });
+            console.log(response.choices[0].text);
 
-           const data = response.data;
-
-
-            if (data.choices && data.choices.length > 0){
-                setInputText(data.choices[0].text.trim());
+            if (response.choices && response.choices.length > 0){
+                return response.choices[0].text;
             } else {
                 console.error('No simplified text returned from OpenAI API')
                 return text;
             }
+
         } catch (error) {
-            console.error("Error calling OpenAI API:", error);
-            return text;
+           if(error instanceof OpenAI.APIError){
+               console.error(error.response.status); // e.g. 401
+               console.error(error.message); // e.g. The authentication token you passed was invalid...
+               console.error(error.code); // e.g. 'invalid_api_key'
+               console.error(error.type); // e.g. 'invalid_request_error'
+           }else{
+               console.log(error);
+           }
         }
     }
 

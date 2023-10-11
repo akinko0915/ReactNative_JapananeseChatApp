@@ -1,11 +1,6 @@
-import {Configuration, OpenAIApi} from 'openai';
-import Constants  from "expo-constants";
+openai.js
+import {OpenAI} from 'openai';
 
-const openaiConfig = new Configuration({
-    apiKey: Constants.expoConfig.extra.openai_apiKey,
-})
-
-export const openai = new OpenAIApi(openaiConfig);
-
-
-
+export const openai = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+});
